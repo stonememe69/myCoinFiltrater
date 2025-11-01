@@ -1,95 +1,113 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Hidden Gem Finder", layout="wide")
+st.set_page_config(page_title="💎 Hidden Gem Pipeline", layout="wide")
 
-st.title("💎 Hidden Gem Filter App")
-st.markdown("Use this app to systematically score crypto coins and find potential hidden gems.")
-
-# Initialize session state
-if "data" not in st.session_state:
-    st.session_state.data = pd.DataFrame(columns=[
-        "Coin", "Sector", "Market Context", "Sector Flow", "Smart Money",
-        "Exchange Flow", "Volume & OI", "Chart Setup", "OBV Strength",
-        "Social Buzz", "Liquidity", "Contract Safety", "Final Score", "Notes"
-    ])
-
-st.sidebar.header("🧠 How to Use")
-st.sidebar.write("""
-1. Enter a coin name & sector  
-2. Score each metric from 1 (weak) → 5 (strong)  
-3. Press **Add Coin** to store result  
-4. Compare and download your final filtered list
+st.title("💎 Hidden Gem Discovery Pipeline")
+st.markdown("""
+Systematic pipeline to filter **raw coins → profitable setups**  
+Follow the stages, verify data using the linked tools, and mark ✅ or ❌ based on factual signals.
 """)
 
-# Input section
-st.subheader("🔍 Coin Information")
-coin_name = st.text_input("Coin Name / Symbol")
-sector = st.text_input("Sector (e.g., AI, DeFi, Gaming)")
+# Initialize storage
+if "coins" not in st.session_state:
+    st.session_state.coins = []
 
-# Scoring sliders
-st.subheader("📊 Scoring Metrics (1–5)")
-cols = st.columns(3)
+# --- Input section ---
+st.sidebar.header("🪙 Add New Coin")
+coin_name = st.sidebar.text_input("Coin Name / Symbol")
+sector = st.sidebar.text_input("Sector (e.g. AI, DeFi, Gaming)")
+notes = st.sidebar.text_area("Notes or Key Narrative Points")
 
-with cols[0]:
-    market_context = st.slider("Market Context", 1, 5, 3)
-    sector_flow = st.slider("Sector Flow", 1, 5, 3)
-    smart_money = st.slider("Smart Money Inflow", 1, 5, 3)
-    exchange_flow = st.slider("Exchange Flow (Outflows Bullish)", 1, 5, 3)
+# --- Pipeline Stages ---
+st.divider()
+st.subheader("🔍 Stage 1 — Discovery Layer")
+st.markdown("""
+**Goal:** Find early tokens with growing activity & liquidity.  
+**Tools:** [Birdeye](https://birdeye.so), [DEXTools](https://www.dextools.io/), [DexCheck](https://dexcheck.ai), [Kaito AI](https://kaito.ai)
+""")
+stage1 = st.radio("Stage 1: Found via early discovery platforms with $100k+ volume & $200k+ LP?", ["❌ No", "✅ Yes"], index=0)
 
-with cols[1]:
-    volume_oi = st.slider("Volume & Open Interest", 1, 5, 3)
-    chart_setup = st.slider("Chart Structure", 1, 5, 3)
-    obv_strength = st.slider("OBV & Volume Strength", 1, 5, 3)
+st.divider()
+st.subheader("💰 Stage 2 — Smart Money Validation")
+st.markdown("""
+**Goal:** Verify whales or smart wallets accumulating.  
+**Tools:** [Arkham](https://arkhamintelligence.com), [Nansen](https://www.nansen.ai), [Santiment](https://santiment.net), [DeFiLlama](https://defillama.com)
+""")
+stage2 = st.radio("Stage 2: Smart money inflow confirmed (accumulation >24h)?", ["❌ No", "✅ Yes"], index=0)
 
-with cols[2]:
-    social_buzz = st.slider("Social Buzz (Narrative Stage)", 1, 5, 3)
-    liquidity = st.slider("Liquidity / Volume", 1, 5, 3)
-    contract_safety = st.slider("Contract & Security", 1, 5, 3)
+st.divider()
+st.subheader("📊 Stage 3 — On-Chain Activity Check")
+st.markdown("""
+**Goal:** Confirm user activity & fee growth.  
+**Tools:** [Artemis](https://app.artemis.xyz/), [Token Terminal](https://tokenterminal.com/), [Santiment](https://santiment.net)
+""")
+stage3 = st.radio("Stage 3: On-chain metrics trending up (active users / fees / TVL)?", ["❌ No", "✅ Yes"], index=0)
 
-notes = st.text_area("📝 Notes (optional)", placeholder="Observations, key levels, or narrative notes...")
+st.divider()
+st.subheader("📈 Stage 4 — Technical Setup Validation")
+st.markdown("""
+**Goal:** Ensure chart is coiling for breakout.  
+**Tools:** [TradingView](https://tradingview.com), [Loris.tools](https://loris.tools), [Coinalyze](https://coinalyze.net), [Laevitas](https://laevitas.ch)
+""")
+stage4 = st.radio("Stage 4: Structure shows breakout base (rising OI + healthy funding)?", ["❌ No", "✅ Yes"], index=0)
 
-# Compute final score
-scores = [market_context, sector_flow, smart_money, exchange_flow, volume_oi,
-          chart_setup, obv_strength, social_buzz, liquidity, contract_safety]
-final_score = round(sum(scores) / len(scores), 2)
-st.metric("Final Confluence Score", f"{final_score}/5")
+st.divider()
+st.subheader("🧠 Stage 5 — Sentiment & Narrative Momentum")
+st.markdown("""
+**Goal:** Confirm early narrative traction, not peak hype.  
+**Tools:** [Santiment](https://santiment.net), [LunarCrush](https://lunarcrush.com), [Kaito.ai](https://kaito.ai), [Twitter Search](https://x.com/search)
+""")
+stage5 = st.radio("Stage 5: Narrative forming (rising mentions, moderate buzz)?", ["❌ No", "✅ Yes"], index=0)
 
-# Button to add data
-if st.button("➕ Add Coin"):
-    new_row = {
-        "Coin": coin_name,
-        "Sector": sector,
-        "Market Context": market_context,
-        "Sector Flow": sector_flow,
-        "Smart Money": smart_money,
-        "Exchange Flow": exchange_flow,
-        "Volume & OI": volume_oi,
-        "Chart Setup": chart_setup,
-        "OBV Strength": obv_strength,
-        "Social Buzz": social_buzz,
-        "Liquidity": liquidity,
-        "Contract Safety": contract_safety,
-        "Final Score": final_score,
-        "Notes": notes
-    }
-    st.session_state.data = pd.concat([st.session_state.data, pd.DataFrame([new_row])], ignore_index=True)
-    st.success(f"Added {coin_name} ✅")
+st.divider()
+st.subheader("💦 Stage 6 — Liquidity & Safety Check")
+st.markdown("""
+**Goal:** Verify liquidity & contract safety.  
+**Tools:** [Dexscreener](https://dexscreener.com), [GoPlus](https://gopluslabs.io), [RugDoc](https://rugdoc.io)
+""")
+stage6 = st.radio("Stage 6: Liquidity > $200k, verified contract, no honeypot?", ["❌ No", "✅ Yes"], index=0)
 
-# Display results
-st.subheader("📈 Coin Scores Table")
-if not st.session_state.data.empty:
-    st.dataframe(st.session_state.data, use_container_width=True)
+# --- Compute Result ---
+st.divider()
+passes = [stage1, stage2, stage3, stage4, stage5, stage6].count("✅ Yes")
+progress = int((passes / 6) * 100)
+
+if passes == 6:
+    verdict = "🚀 Potential Hidden Gem (Strong Confluence)"
+elif passes >= 4:
+    verdict = "⚡ Worth Monitoring (Medium Confluence)"
 else:
-    st.info("No coins added yet.")
+    verdict = "❌ Weak Setup (Skip)"
 
-# Chart
-if not st.session_state.data.empty:
-    st.subheader("📊 Score Comparison")
-    chart_data = st.session_state.data[["Coin", "Final Score"]].set_index("Coin")
-    st.bar_chart(chart_data)
+st.subheader("🧩 Pipeline Summary")
+st.progress(progress / 100)
+st.write(f"**{passes}/6 stages passed** — {verdict}")
 
-# Download button
-if not st.session_state.data.empty:
-    csv = st.session_state.data.to_csv(index=False)
-    st.download_button("⬇️ Download Results (CSV)", csv, "hidden_gem_scores.csv", "text/csv")
+# --- Add coin to list ---
+if st.sidebar.button("➕ Add Coin to List"):
+    if coin_name:
+        st.session_state.coins.append({
+            "Coin": coin_name,
+            "Sector": sector,
+            "Passes": passes,
+            "Progress (%)": progress,
+            "Verdict": verdict,
+            "Notes": notes
+        })
+        st.sidebar.success(f"{coin_name} added to list ✅")
+    else:
+        st.sidebar.warning("Please enter a coin name first.")
+
+# --- Display Saved Coins ---
+st.divider()
+st.subheader("📋 Filtered Coin List")
+
+if st.session_state.coins:
+    df = pd.DataFrame(st.session_state.coins)
+    st.dataframe(df, use_container_width=True)
+
+    csv = df.to_csv(index=False)
+    st.download_button("⬇️ Download Results (CSV)", csv, "hidden_gem_pipeline.csv", "text/csv")
+else:
+    st.info("No coins added yet. Use the sidebar to add your first coin!")
